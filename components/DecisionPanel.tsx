@@ -79,6 +79,7 @@ export default function DecisionPanel({ isGameOver }: Props) {
             step={1}
             value={price}
             onChange={(e) => setPrice(Number(e.target.value))}
+            onFocus={(e) => e.target.select()}
             disabled={loading || isGameOver}
           />
         </label>
@@ -91,6 +92,7 @@ export default function DecisionPanel({ isGameOver }: Props) {
             step={1}
             value={salaryPct}
             onChange={(e) => setSalaryPct(Number(e.target.value))}
+            onFocus={(e) => e.target.select()}
             disabled={loading || isGameOver}
           />
         </label>
@@ -102,6 +104,7 @@ export default function DecisionPanel({ isGameOver }: Props) {
             step={1}
             value={newEngineers}
             onChange={(e) => setNewEngineers(Number(e.target.value))}
+            onFocus={(e) => e.target.select()}
             disabled={loading || isGameOver}
           />
         </label>
@@ -113,6 +116,7 @@ export default function DecisionPanel({ isGameOver }: Props) {
             step={1}
             value={newSales}
             onChange={(e) => setNewSales(Number(e.target.value))}
+            onFocus={(e) => e.target.select()}
             disabled={loading || isGameOver}
           />
         </label>
