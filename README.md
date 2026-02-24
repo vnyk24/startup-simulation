@@ -43,18 +43,15 @@ Open `http://localhost:3000`. To run tests: `npm test`.
 
 ```
 Browser
-  │  POST /api/advance  (price, hires, salary %)
+  │  POST /api/advance
   ▼
-/api/advance  ->  validate input
+/api/advance  ->  simulateQuarter()
   │
   ▼
-simulateQuarter()        lib/simulation.ts  (pure function, no side effects)
-  │  outcome
+advance_game_tx  (atomic write)
+  │
   ▼
-advance_game_tx          Postgres transaction  (atomic)
-  │  write
-  ▼
-games + quarterly_history tables
+games + quarterly_history
   │  updated state
   ▼
 Browser
