@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  outputFileTracingRoot: "/Users/vinaykkovvada/Downloads/startup-simulation"
+  productionBrowserSourceMaps: false
 };
 
 export default nextConfig;
