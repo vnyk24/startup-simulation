@@ -45,7 +45,7 @@ Open `http://localhost:3000`. To run tests: `npm test`.
 Browser
   │  POST /api/advance  (price, hires, salary %)
   ▼
-/api/advance  ──  validate input
+/api/advance  ->  validate input
   │
   ▼
 simulateQuarter()        lib/simulation.ts  (pure function, no side effects)
