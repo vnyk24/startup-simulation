@@ -41,11 +41,16 @@ Open `http://localhost:3000`. To run tests: `npm test`.
 
 ## Architecture
 
-When you click Advance Turn the browser sends four numbers to `POST /api/advance` (price, new hires, salary percentage). That is all the client ever sends. The server reads the current game state from the database, runs the simulation, and writes the result back. The client never computes anything financial.
+```mermaid
+flowchart LR
+    A([Browser]) -->|POST /api/advance\nprice, hires, salary%| B[API Route]
+    B -->|validate input| C[simulateQuarter\nlib/simulation.ts]
+    C -->|outcome| D[advance_game_tx\nPostgres function]
+    D -->|atomic write| E[(games\nquarterly_history)]
+    D -->|updated state| A
+```
 
-The simulation is a pure function in `lib/simulation.ts`. It takes the current state and player decisions as plain objects and returns the outcome with no database calls or side effects. This makes it easy to unit test against the spec formulas and keeps the core logic isolated from the web layer.
-
-The state update and history insert happen inside a single Postgres function called `advance_game_tx`. Both writes are atomic so if either fails nothing is persisted. Row Level Security is on both tables and `security invoker` on the Postgres function ensures RLS applies inside the transaction too.
+The client sends four numbers and nothing else. All financial logic runs in `lib/simulation.ts`, a pure function with no database calls or side effects. The result is written atomically via a Postgres transaction function so the game state and history are always in sync. Row Level Security on both tables ensures users only ever access their own data.
 
 ## Tradeoffs
 
