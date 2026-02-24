@@ -3,10 +3,11 @@
 Single-player, turn-based startup simulation built with Next.js App Router and Supabase.
 
 ## Setup
-1. `cp .env.example .env.local` — then fill in your Supabase project URL and anon key
-2. `npm install`
-3. In your Supabase SQL editor, run the contents of `supabase/schema.sql`
-4. `npm run dev`
+1. Create a free project at [supabase.com](https://supabase.com)
+2. `cp .env.example .env.local`
+3. In `.env.local`, set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` — both are found in your Supabase project under **Settings → API**
+4. In the Supabase **SQL Editor**, run the contents of `supabase/schema.sql`
+5. `npm install && npm run dev`
 
 Run simulation unit tests anytime with `npm test`.
 
