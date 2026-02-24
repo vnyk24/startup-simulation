@@ -42,11 +42,11 @@ Open `http://localhost:3000`. To run tests: `npm test`.
 ## Architecture
 
 ```mermaid
-flowchart LR
-    A([Browser]) -->|POST /api/advance\nprice, hires, salary%| B[API Route]
-    B -->|validate input| C[simulateQuarter\nlib/simulation.ts]
-    C -->|outcome| D[advance_game_tx\nPostgres function]
-    D -->|atomic write| E[(games\nquarterly_history)]
+flowchart TD
+    A([Browser]) -->|"POST /api/advance — price, hires, salary %"| B["API Route\n/api/advance"]
+    B -->|validate| C["simulateQuarter()\nlib/simulation.ts"]
+    C -->|outcome| D["advance_game_tx\nPostgres transaction"]
+    D -->|atomic write| E[("games\nquarterly_history")]
     D -->|updated state| A
 ```
 
