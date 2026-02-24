@@ -4,8 +4,6 @@ A turn-based startup simulation game where you run a company one quarter at a ti
 
 Built with Next.js App Router and Supabase.
 
----
-
 ## Setup
 
 1. Create a free project at [supabase.com](https://supabase.com).
@@ -29,8 +27,6 @@ npm install && npm run dev
 
 Open `http://localhost:3000`. To run tests: `npm test`.
 
----
-
 ## Architecture
 
 When you click Advance Turn the browser sends four numbers to `POST /api/advance` — price, new hires, and salary percentage. That is all the client ever sends. The server reads your current game state from the database, runs the simulation, and writes the result back. The client receives the outcome. It never computes anything financial itself.
@@ -40,8 +36,6 @@ I built the simulation as a pure function in `lib/simulation.ts`. It takes the c
 The state update and history insert happen inside a single Postgres function called `advance_game_tx`. Both writes are atomic — if either fails, neither persists. I chose this over two sequential API calls because a failure halfway through would leave the game in an inconsistent state with no clean recovery path.
 
 Row Level Security is on both tables. Every query is scoped to the authenticated user automatically. I used `security invoker` on the Postgres function so RLS applies inside the transaction too, not just at the API layer.
-
----
 
 ## Database
 
@@ -53,8 +47,6 @@ Quality is not stored in history. The dashboard history table shows revenue, net
 
 The competitors field is stored and shown on the dashboard because it is part of the initial game state. The demand formula does not reference it directly, so it is not passed into the simulation function. If the model is updated with a market-share mechanic the field is already in the schema and type system.
 
----
-
 ## Tradeoffs
 
 **No game reset.** There is one game per user enforced by a unique constraint. A reset sounds simple but it is not. Deleting a game raises a question that is not straightforward: should the history go too? If yes you lose the audit trail. If no the data becomes orphaned. Doing it right means a soft-delete or archive pattern, a confirmation step, and a clear explanation to the user of what they are losing. Shipping a half-built version of that would be worse than leaving it out and documenting the gap, which is what I did.
@@ -65,16 +57,12 @@ The competitors field is stored and shown on the dashboard because it is part of
 
 **Salary range constants live in one place.** `SALARY_PCT_MIN` and `SALARY_PCT_MAX` are exported from `lib/simulation.ts` and used by both the server validation and the client form. If the range ever changes it is one edit.
 
----
-
 ## What I would add next
 
 - Game restart with an explicit archive of completed runs
 - Integration tests for the `/api/advance` route
 - Debounce on the Advance Turn button to close the double-click race
 - A migration-based schema management setup instead of a single SQL file
-
----
 
 ## Known issues
 
