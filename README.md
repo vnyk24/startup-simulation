@@ -1,5 +1,7 @@
 # Startup Simulation
 
+**Live demo:** https://startup-simulation.vercel.app
+
 A turn-based startup simulation game where you run a company one quarter at a time. Each turn you set your product price, decide how many engineers and sales staff to hire, and choose what salary to offer. The server processes everything and shows you the results. Survive to Year 10 with cash in the bank and you win.
 
 Built with Next.js App Router and Supabase.
