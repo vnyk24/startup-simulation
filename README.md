@@ -7,7 +7,7 @@ Built with Next.js App Router and Supabase.
 ## Setup
 
 1. Create a free project at [supabase.com](https://supabase.com).
-2. In the project root, copy the env file and fill in your keys (found at **Settings → API** in Supabase):
+2. In the project root, copy the env file and fill in your keys (found at **Settings > API** in Supabase):
 
 ```bash
 cp .env.example .env.local
@@ -27,43 +27,44 @@ npm install && npm run dev
 
 Open `http://localhost:3000`. To run tests: `npm test`.
 
+## What was built
+
+- Email and password authentication via Supabase Auth
+- Persistent game state stored in Postgres, one game per user
+- Quarterly decision panel: unit price, engineers to hire, sales staff to hire, salary percentage
+- `POST /api/advance` route that runs the full simulation on the server and persists the result
+- Dashboard showing cash, revenue, net income, headcount, year, quarter, last 4 quarters history table, and a product quality KPI
+- Office visualization with 20 desks showing engineers, sales staff, and empty seats
+- Win condition at Year 10 with positive cash, lose condition when cash hits zero or below
+- Pure simulation function in `lib/simulation.ts` with unit tests
+- Atomic state update using a Postgres transaction function so history and game state never get out of sync
+
 ## Architecture
 
-When you click Advance Turn the browser sends four numbers to `POST /api/advance` — price, new hires, and salary percentage. That is all the client ever sends. The server reads your current game state from the database, runs the simulation, and writes the result back. The client receives the outcome. It never computes anything financial itself.
+When you click Advance Turn the browser sends four numbers to `POST /api/advance` (price, new hires, salary percentage). That is all the client ever sends. The server reads the current game state from the database, runs the simulation, and writes the result back. The client never computes anything financial.
 
-I built the simulation as a pure function in `lib/simulation.ts`. It takes the current state and your decisions as plain objects and returns the outcome. No database calls, no HTTP, no side effects. This made it easy to unit test with exact numbers against the spec formulas, and it means the core logic is completely isolated from the web layer.
+The simulation is a pure function in `lib/simulation.ts`. It takes the current state and player decisions as plain objects and returns the outcome with no database calls or side effects. This makes it easy to unit test against the spec formulas and keeps the core logic isolated from the web layer.
 
-The state update and history insert happen inside a single Postgres function called `advance_game_tx`. Both writes are atomic — if either fails, neither persists. I chose this over two sequential API calls because a failure halfway through would leave the game in an inconsistent state with no clean recovery path.
-
-Row Level Security is on both tables. Every query is scoped to the authenticated user automatically. I used `security invoker` on the Postgres function so RLS applies inside the transaction too, not just at the API layer.
-
-## Database
-
-Two tables. `games` holds the live state of a session — cash, headcount, quality, year, quarter, and a flag for whether the game has ended. `quarterly_history` stores an immutable snapshot after each turn with revenue, net income, cash and headcount. History rows are never updated, only inserted.
-
-There is a compound index on `(game_id, year desc, quarter desc)` which is exactly how the last-four-quarters query is ordered. One index scan, no sort step.
-
-Quality is not stored in history. The dashboard history table shows revenue, net income, cash and headcount which is what is needed. Current quality is always available from the games row.
-
-The competitors field is stored and shown on the dashboard because it is part of the initial game state. The demand formula does not reference it directly, so it is not passed into the simulation function. If the model is updated with a market-share mechanic the field is already in the schema and type system.
+The state update and history insert happen inside a single Postgres function called `advance_game_tx`. Both writes are atomic so if either fails nothing is persisted. Row Level Security is on both tables and `security invoker` on the Postgres function ensures RLS applies inside the transaction too.
 
 ## Tradeoffs
 
-**No game reset.** There is one game per user enforced by a unique constraint. A reset sounds simple but it is not. Deleting a game raises a question that is not straightforward: should the history go too? If yes you lose the audit trail. If no the data becomes orphaned. Doing it right means a soft-delete or archive pattern, a confirmation step, and a clear explanation to the user of what they are losing. Shipping a half-built version of that would be worse than leaving it out and documenting the gap, which is what I did.
+**No game reset.** One game per user, enforced by a unique constraint. A reset sounds simple but raises questions that are not straightforward: should the history go too? If yes you lose the audit trail. If no the data becomes orphaned. Doing it right means a soft-delete or archive pattern, a confirmation step, and a clear explanation of what the user is losing. Shipping a half-built version would be worse than leaving it out and documenting the gap.
 
-**Table instead of a chart.** A chart looks nicer but needs either a dependency or a significant amount of custom SVG. A table shows all the numbers with no ambiguity and no third-party code. For a simulation where the numbers are the point, that felt like the right call.
+**Table instead of a chart.** A chart needs a dependency or a significant amount of custom SVG. A table shows all the numbers with no ambiguity and no third-party code.
 
-**20 desks in the office visualization.** The desk count is a display choice. At early stage you see mostly empty desks. As you hire they fill up. When you grow beyond 20 the grid stays full and the real headcount is shown in the summary and KPI cards. Hiring is never capped by the desk count — payroll is the natural constraint on aggressive hiring and that comes from the simulation model.
+**20 desks in the office visualization.** At early stage you see mostly empty desks. As you hire they fill. When headcount exceeds 20 the grid stays full and the real count appears in the KPI cards. Hiring is never capped by the desk count; payroll is the natural constraint and that comes from the simulation model.
 
-**Salary range constants live in one place.** `SALARY_PCT_MIN` and `SALARY_PCT_MAX` are exported from `lib/simulation.ts` and used by both the server validation and the client form. If the range ever changes it is one edit.
+**Salary range constants in one place.** `SALARY_PCT_MIN` and `SALARY_PCT_MAX` are exported from `lib/simulation.ts` and used by both server validation and the client form. One edit to change both.
 
-## What I would add next
+## What was not built
 
-- Game restart with an explicit archive of completed runs
+- In-app game reset or new game flow
+- Multiplayer or leaderboard
+- Charts for history data
 - Integration tests for the `/api/advance` route
-- Debounce on the Advance Turn button to close the double-click race
-- A migration-based schema management setup instead of a single SQL file
+- Migration-based schema management
 
 ## Known issues
 
-No in-app way to start a new game. To reset, delete the row in the `games` table from the Supabase dashboard. Rapid double-clicking Advance Turn can submit two requests before the first one completes. The database function blocks advancing a game that is already over but it does not rate-limit mid-game submissions.
+No in-app way to start a new game. To reset, delete the row in the `games` table from the Supabase dashboard. Rapid double-clicking Advance Turn can submit two requests before the first completes. The database function blocks advancing a finished game but does not rate-limit mid-game submissions.
