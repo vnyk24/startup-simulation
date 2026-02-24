@@ -41,13 +41,23 @@ Open `http://localhost:3000`. To run tests: `npm test`.
 
 ## Architecture
 
-```mermaid
-flowchart TD
-    A([Browser]) -->|"POST /api/advance — price, hires, salary %"| B["API Route\n/api/advance"]
-    B -->|validate| C["simulateQuarter()\nlib/simulation.ts"]
-    C -->|outcome| D["advance_game_tx\nPostgres transaction"]
-    D -->|atomic write| E[("games\nquarterly_history")]
-    D -->|updated state| A
+```
+Browser
+  │  POST /api/advance  (price, hires, salary %)
+  ▼
+/api/advance  ──  validate input
+  │
+  ▼
+simulateQuarter()        lib/simulation.ts  (pure function, no side effects)
+  │  outcome
+  ▼
+advance_game_tx          Postgres transaction  (atomic)
+  │  write
+  ▼
+games + quarterly_history tables
+  │  updated state
+  ▼
+Browser
 ```
 
 The client sends four numbers and nothing else. All financial logic runs in `lib/simulation.ts`, a pure function with no database calls or side effects. The result is written atomically via a Postgres transaction function so the game state and history are always in sync. Row Level Security on both tables ensures users only ever access their own data.
