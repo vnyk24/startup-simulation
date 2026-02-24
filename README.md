@@ -8,28 +8,26 @@ Built with Next.js App Router and Supabase.
 
 ## Setup
 
-You need a Supabase account. It is free at [supabase.com](https://supabase.com). Create a new project there first.
+1. Create a free project at [supabase.com](https://supabase.com).
+2. In the project root, copy the env file and fill in your keys (found at **Settings → API** in Supabase):
 
 ```bash
 cp .env.example .env.local
 ```
-
-Open `.env.local` and fill in two values. Both are on the **Settings → API** page of your Supabase project.
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=your project url here
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your anon key here
 ```
 
-Then go to the **SQL Editor** in your Supabase dashboard and run everything inside `supabase/schema.sql`. This creates the tables, indexes, RLS policies and the transaction function.
-
-`npm install` downloads all the project dependencies. `npm run dev` starts the local development server.
+3. In the Supabase **SQL Editor**, paste and run the contents of `supabase/schema.sql`.
+4. From the project root, install dependencies and start the dev server:
 
 ```bash
 npm install && npm run dev
 ```
 
-Once running, open `http://localhost:3000` in your browser. To run the simulation unit tests at any point: `npm test`.
+Open `http://localhost:3000`. To run tests: `npm test`.
 
 ---
 
