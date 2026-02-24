@@ -58,12 +58,11 @@ export default function DecisionPanel({ isGameOver }: Props) {
 
       setSuccess("Quarter advanced successfully.");
       router.refresh();
-      return;
     } catch {
       setError("Request failed. Please try again.");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   }
 
   return (
