@@ -23,11 +23,13 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your anon key here
 
 Then go to the **SQL Editor** in your Supabase dashboard and run everything inside `supabase/schema.sql`. This creates the tables, indexes, RLS policies and the transaction function.
 
+`npm install` downloads all the project dependencies. `npm run dev` starts the local development server.
+
 ```bash
 npm install && npm run dev
 ```
 
-App runs at `http://localhost:3000`. To run the simulation unit tests: `npm test`.
+Once running, open `http://localhost:3000` in your browser. To run the simulation unit tests at any point: `npm test`.
 
 ---
 
