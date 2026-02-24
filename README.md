@@ -6,7 +6,7 @@ Built with Next.js App Router and Supabase.
 
 ---
 
-## Getting it running
+## Setup
 
 You need a Supabase account. It is free at [supabase.com](https://supabase.com). Create a new project there first.
 
@@ -33,7 +33,7 @@ Once running, open `http://localhost:3000` in your browser. To run the simulatio
 
 ---
 
-## How it works
+## Architecture
 
 When you click Advance Turn the browser sends four numbers to `POST /api/advance` — price, new hires, and salary percentage. That is all the client ever sends. The server reads your current game state from the database, runs the simulation, and writes the result back. The client receives the outcome. It never computes anything financial itself.
 
@@ -45,7 +45,7 @@ Row Level Security is on both tables. Every query is scoped to the authenticated
 
 ---
 
-## The database
+## Database
 
 Two tables. `games` holds the live state of a session — cash, headcount, quality, year, quarter, and a flag for whether the game has ended. `quarterly_history` stores an immutable snapshot after each turn with revenue, net income, cash and headcount. History rows are never updated, only inserted.
 
@@ -57,7 +57,7 @@ The competitors field is stored and shown on the dashboard because it is part of
 
 ---
 
-## Decisions I made
+## Tradeoffs
 
 **No game reset.** There is one game per user enforced by a unique constraint. A reset sounds simple but it is not. Deleting a game raises a question that is not straightforward: should the history go too? If yes you lose the audit trail. If no the data becomes orphaned. Doing it right means a soft-delete or archive pattern, a confirmation step, and a clear explanation to the user of what they are losing. Shipping a half-built version of that would be worse than leaving it out and documenting the gap, which is what I did.
 
@@ -69,7 +69,7 @@ The competitors field is stored and shown on the dashboard because it is part of
 
 ---
 
-## What I would build next
+## What I would add next
 
 - Game restart with an explicit archive of completed runs
 - Integration tests for the `/api/advance` route
@@ -78,6 +78,6 @@ The competitors field is stored and shown on the dashboard because it is part of
 
 ---
 
-## Known gaps
+## Known issues
 
 No in-app way to start a new game. To reset, delete the row in the `games` table from the Supabase dashboard. Rapid double-clicking Advance Turn can submit two requests before the first one completes. The database function blocks advancing a game that is already over but it does not rate-limit mid-game submissions.
