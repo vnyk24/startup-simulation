@@ -38,22 +38,19 @@ export default function OfficeVisualization({ engineers, sales }: Props) {
   const zoneSize = 10;
   const totalDesks = zoneSize * 2;
   const headcount = engineers + sales;
-  const occupiedDesks = Math.min(headcount, totalDesks);
-  const emptyDesks = Math.max(totalDesks - headcount, 0);
 
-  const rawEngineerShare =
-    headcount === 0 ? 0 : (engineers / headcount) * occupiedDesks;
-  const engineerDesks = Math.min(Math.round(rawEngineerShare), occupiedDesks);
-  const salesDesks = Math.max(occupiedDesks - engineerDesks, 0);
+  const engShown = Math.min(engineers, zoneSize);
+  const salesShown = Math.min(sales, zoneSize);
+  const remoteCount = (engineers - engShown) + (sales - salesShown);
 
   const engZone: DeskKind[] = [
-    ...Array<DeskKind>(Math.min(engineerDesks, zoneSize)).fill("engineer"),
-    ...Array<DeskKind>(Math.max(zoneSize - engineerDesks, 0)).fill("empty")
+    ...Array<DeskKind>(engShown).fill("engineer"),
+    ...Array<DeskKind>(zoneSize - engShown).fill("empty")
   ];
 
   const salesZone: DeskKind[] = [
-    ...Array<DeskKind>(Math.min(salesDesks, zoneSize)).fill("sales"),
-    ...Array<DeskKind>(Math.max(zoneSize - salesDesks, 0)).fill("empty")
+    ...Array<DeskKind>(salesShown).fill("sales"),
+    ...Array<DeskKind>(zoneSize - salesShown).fill("empty")
   ];
 
   return (
@@ -61,9 +58,9 @@ export default function OfficeVisualization({ engineers, sales }: Props) {
       <div className="db-card-head">
         <h2>Office floor</h2>
         <span className="db-card-sub">
-          {headcount > totalDesks
+          {remoteCount > 0
             ? `${headcount} total · ${totalDesks} desks shown`
-            : `${Math.min(headcount, totalDesks)}/${totalDesks} desks occupied`}
+            : `${engShown + salesShown}/${totalDesks} desks occupied`}
         </span>
       </div>
 
@@ -76,10 +73,10 @@ export default function OfficeVisualization({ engineers, sales }: Props) {
           <span className="chip-dot" style={{ background: "var(--sales)" }} />
           {sales} sales
         </div>
-        {emptyDesks > 0 && (
+        {(zoneSize - engShown) + (zoneSize - salesShown) > 0 && (
           <div className="summary-chip">
             <span className="chip-dot" style={{ background: "var(--empty-dot)" }} />
-            {emptyDesks} open
+            {(zoneSize - engShown) + (zoneSize - salesShown)} open
           </div>
         )}
       </div>
@@ -110,9 +107,9 @@ export default function OfficeVisualization({ engineers, sales }: Props) {
         </div>
       </div>
 
-      {headcount > totalDesks && (
+      {remoteCount > 0 && (
         <p className="office-overflow">
-          {headcount - totalDesks} team members work remotely (beyond office capacity)
+          {remoteCount} team members work remotely (beyond office capacity)
         </p>
       )}
     </div>
