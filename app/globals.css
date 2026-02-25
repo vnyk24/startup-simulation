@@ -684,12 +684,67 @@ tbody tr:last-child td {
 
 @media (max-width: 540px) {
   .db-topbar {
-    padding: 0 14px;
+    padding: 0 12px;
     height: 50px;
+  }
+
+  .db-brand {
+    font-size: 15px;
+  }
+
+  .db-period {
+    font-size: 11px;
   }
 
   .db-left,
   .db-right {
     padding: 12px;
+    gap: 10px;
+  }
+
+  .kpi-primary .kpi-value {
+    font-size: 1.8rem;
+  }
+
+  .kpi-value {
+    font-size: 1.3rem;
+  }
+
+  .kpi-row {
+    gap: 8px;
+  }
+
+  .office-floor {
+    gap: 8px;
+  }
+
+  .wing-grid {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    min-width: 480px;
+  }
+
+  .decision-form {
+    gap: 10px;
+  }
+
+  .advance-btn {
+    width: 100%;
+  }
+
+  .db-topbar-right {
+    gap: 6px;
+  }
+
+  .end-state {
+    padding: 16px;
   }
 }
